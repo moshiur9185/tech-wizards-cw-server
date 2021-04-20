@@ -27,6 +27,7 @@ client.connect(err => {
   const bookListCollection = client.db("computerService").collection("bookingList");
   const reviewCollection = client.db("computerService").collection("review");
   const adminCollection = client.db("computerService").collection("admin");
+  const blogsCollection = client.db("computerService").collection("blogs");
   
   //service post
   app.post("/addService", (req, res) => {
@@ -164,6 +165,37 @@ app.post("/isAdmin", (req, res) => {
     res.send(admins.length > 0)
   });
 });
+
+  //blogs add
+  app.post("/addBlog", (req, res) => {
+    const file = req.files.file;
+    const name = req.body.name;
+    const title = req.body.title;
+    const category = req.body.category;
+    const description = req.body.description;
+    const newImg = file.data;
+  const encImg = newImg.toString("base64");
+
+  let image = {
+    contentType: file.mimetype,
+    size: file.size,
+    img: Buffer.from(encImg, "base64"),
+  };
+
+  blogsCollection.insertOne({name, category, title, description, image }).then((result) => {
+    res.send(result.insertedCount > 0);
+  });
+})
+
+//get blogs
+app.get("/blogs", (req, res) => {
+  blogsCollection.find({})
+  .toArray((err, documents) => {
+    res.send(documents);
+    // console.log(err,documents)
+  });
+});
+
   
 });
 
